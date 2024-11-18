@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -11,25 +11,35 @@ function Register() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleRegister = (e) => {
     e.preventDefault();
-    const { username, password } = formData;
+    const { email, password } = formData;
 
-    if (!username || !password) {
+    if (!email || !password) {
       setMessage("Please fill in all fields.");
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    if (users.find((user) => user.username === username)) {
-      setMessage("Username already exists.");
+    if (!isValidEmail(email)) {
+      setMessage("Invalid email format.");
       return;
     }
 
-    users.push({ username, password });
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    if (users.find((user) => user.email === email)) {
+      setMessage("Email already exists.");
+      return;
+    }
+
+    users.push({ email, password });
     localStorage.setItem("users", JSON.stringify(users));
     setMessage("Registration successful! You can now log in.");
-    setFormData({ username: "", password: "" });
+    setFormData({ email: "", password: "" });
 
     setTimeout(() => navigate("/login"), 2000); // Redirect to login after a delay
   };
@@ -39,10 +49,10 @@ function Register() {
       <h2>Register</h2>
       <form onSubmit={handleRegister}>
         <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
           onChange={handleInputChange}
           style={styles.input}
         />
